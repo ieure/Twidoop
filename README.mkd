@@ -1,0 +1,86 @@
+Twidoop
+=======
+
+This is a tool for streaming statuses from the Twitter firehose into Hadoop. You should be familiar with [Twitter's Streaming API](http://apiwiki.twitter.com/Streaming-API-Documentation) before you think about using Twidoop.
+
+
+Caveats
+-------
+
+ * Statuses are stored as `NULL`-terminated JSON strings.
+
+ * Statuses are stored in files keyed by day, e.g. `statuses-2009-12-25.json`. The day is based on local time, *not* the time in the status.
+
+ * If you stop and restart Twidoop, it will blow away the data collected for that day.
+
+ * The HDFS replica count and block size are fixed. There's one replica and the block size is 16mb. You might want to change this. A block size of 5mb is better for the samplehose, since otherwise it takes too long to get a new block of data.
+
+ * Twidoop only works with Hadoop 0.20.x.
+
+
+Dependencies
+------------
+
+ * Clojure 1.1.x
+ * Clojure-contrib
+ * Leiningen
+ * Hadoop
+ * Commons-CLI
+ * Commons-Logging
+ * Java
+
+
+Installation (Mac OS X)
+-----------------------
+
+Install MacPorts & leiningen:
+
+    $ sudo port sync
+    $ sudo port install leiningen
+
+
+Installation (Debian)
+---------------------
+
+Install [leiningen](http://github.com/technomancy/leiningen):
+
+    $ mkdir -p ~/.bin
+    $ echo 'export PATH=~/.bin:$PATH' >> ~/.profile
+    $ . ~/.profile
+    $ curl http://github.com/technomancy/leiningen/raw/stable/bin/lein > ~/.bin/lein
+    $ chmod +x ~/.bin/lein
+    $ lein self-install
+
+
+Use
+---
+
+Compile it:
+
+    $ lein jar
+
+There's `--help`, which should be self-explanatory:
+
+    $ ./twidoop --help
+    twidoop -- Stream the Twitter firehose into Hadoop.
+    Options
+      --output, -o <arg>      Output here on HDFS                              [default /firehose]
+      --hdfs <arg>            HDFS to connect to                               [default hdfs://localhost:9000]
+      --block-size, -b <arg>  HDFS block size (in megabytes)                   [default 16]
+      --replicas, -r <arg>    HDFS replica count                               [default 1]
+      --type, -t <arg>        Type of stream to read from: sample or firehose  [default sample]
+      --user, -u <arg>        Twitter username
+      --pass, -p <arg>        Twitter password
+
+
+Examples
+--------
+
+Stream the samplehose (available to any registered Twitter user) into HDFS on localhost:
+
+    $ ./twidoop -u twitter_user -p twitter_pass --hdfs hdfs://localhost:9000
+
+Stream the firehose into "/user/ieure/firehose" on a HDFS cluster::
+
+    $ ./twidoop -u twitter_user -p twitter_pass -t firehose -o /user/ieure/firehose -h hdfs://hadoop.internal:9000
+
