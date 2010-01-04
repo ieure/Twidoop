@@ -1,6 +1,6 @@
 ;; -*- coding: utf-8 -*-
 ;;
-;; © 2009 Digg, Inc. All rights reserved.
+;; © 2009, 2010 Digg, Inc. All rights reserved.
 ;; Author: Ian Eure <ian@digg.com>
 ;;
 
@@ -62,15 +62,15 @@ Type can be `sample' or `firehose'."
   "Save Twitter statuses into HDFS."
   (let [output (atom (get-output out-path))]
     (doseq [status (:body-seq (http/request url))]
-      (do (.writeBytes (:file @output) (str status "\0"))
-          (print ".")
-          (flush))
+      (.writeBytes (:file @output) (str status "\0"))
+      (print ".")
+      (flush)
 
       (when (stale? @output)
-        (do (print (format "\n%s -> " (:date @output)))
-            (.close (:file @output))
-            (reset! output (get-output (:path @output)))
-            (println (:date @output)))))))
+        (print (format "\n%s -> " (:date @output)))
+        (.close (:file @output))
+        (reset! output (get-output (:path @output)))
+        (println (:date @output))))))
 
 (defn -main [& args]
   (with-command-line args
