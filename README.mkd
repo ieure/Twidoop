@@ -84,3 +84,8 @@ Stream the firehose into "/user/ieure/firehose" on a HDFS cluster::
 
     $ ./twidoop -u twitter_user -p twitter_pass -t firehose -o /user/ieure/firehose -h hdfs://hadoop.internal:9000
 
+
+License
+-------
+
+Twidoop is licensed under the three-clause BSD liense. See `LICENSE` for the complete licensing terms.
