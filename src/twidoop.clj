@@ -61,9 +61,11 @@ Type can be `sample' or `firehose'."
 (defmacro forever
   "Run forms forever, ignoring exceptions."
   [form]
-  `(while true
-          (try ~form
-                (catch Exception e#))))
+  `(let [attempts# 0]
+     (while true
+            (try ~form
+                 (catch Exception e#
+                   (Thread/sleep (* 2000 (inc attempts#))))))))
 
 (defn save-statuses [url out-path]
   "Save Twitter statuses into HDFS."
