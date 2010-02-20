@@ -58,19 +58,27 @@ Type can be `sample' or `firehose'."
   "Is the current output stale?"
   (not (= (today) date)))
 
+(defmacro forever
+  "Run forms forever, ignoring exceptions."
+  [form]
+  `(while true
+          (try ~form
+                (catch Exception e#))))
+
 (defn save-statuses [url out-path]
   "Save Twitter statuses into HDFS."
   (let [output (atom (get-output out-path))]
-    (doseq [status (:body-seq (http/request url))]
-      (.writeBytes (:file @output) (str status "\0"))
-      (print ".")
-      (flush)
+    (forever
+     (doseq [status (:body-seq (http/request url))]
+       (.writeBytes (:file @output) (str status "\0"))
+       (print ".")
+       (flush)
 
-      (when (stale? @output)
-        (print (format "\n%s -> " (:date @output)))
-        (.close (:file @output))
-        (reset! output (get-output (:path @output)))
-        (println (:date @output))))))
+       (when (stale? @output)
+         (print (format "\n%s -> " (:date @output)))
+         (.close (:file @output))
+         (reset! output (get-output (:path @output)))
+         (println (:date @output)))))))
 
 (defn -main [& args]
   (with-command-line args
